@@ -14,35 +14,32 @@ package HW_12_2;
 //        Потік C викликає fizzbuzz(), щоб перевірити, чи ділиться число на 3 та 5 одночасно, і якщо так - додати в чергу на виведення для потоку D рядок fizzbuzz.
 //        Потік D викликає метод number(), щоб вивести наступне число з черги, якщо є таке число для виведення.
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введіть кількість чисел(n): ");
-        int n = scanner.nextInt();
-        ArrayList<Integer> numbers = new ArrayList<>();
-        ThreadA threadA = new ThreadA();
-        ThreadB threadB = new ThreadB();
-        ThreadC threadC = new ThreadC();
-        ThreadD threadD = new ThreadD();
-        threadA.start();
-        threadB.start();
-        threadC.start();
-        threadD.start();
-        for(int i = 1; i <= n; i++)
-            numbers.add(i);
-        for(int i = 0; i < numbers.size(); i++) {
-            boolean hasNext = i < numbers.size() - 1;
-            if(threadC.fizzbuzz(numbers.get(i)))
-                threadD.number("fizzbuzz", hasNext);
-            else if(threadB.buzz(numbers.get(i)))
-                threadD.number("buzz", hasNext);
-            else if(threadA.fizz(numbers.get(i)))
-                threadD.number("fizz", hasNext);
-            else if(true)
-                threadD.number("" + numbers.get(i), hasNext);
+        FizzBuzz fizzBuzz = new FizzBuzz(scanner.nextInt());
+
+        Thread fizzThread = new Thread(fizzBuzz::fizz);
+        Thread buzzThread = new Thread(fizzBuzz::buzz);
+        Thread fizzbuzzThread = new Thread(fizzBuzz::fizzbuzz);
+        Thread numberThread = new Thread(fizzBuzz::number);
+
+        numberThread.start();
+        fizzThread.start();
+        buzzThread.start();
+        fizzbuzzThread.start();
+
+        try {
+            numberThread.join();
+            fizzThread.join();
+            buzzThread.join();
+            fizzbuzzThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
+
